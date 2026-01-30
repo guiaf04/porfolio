@@ -196,10 +196,27 @@ const App: React.FC = () => {
     }
   };
 
-  const nextProject = () => setActiveProjectIndex((prev) => (prev + 1) % currentProjects.length);
-  const prevProject = () => setActiveProjectIndex((prev) => (prev - 1 + currentProjects.length) % currentProjects.length);
-  const nextImage = () => selectedProject?.images && setCurrentImageIndex((prev) => (prev + 1) % selectedProject.images!.length);
-  const prevImage = () => selectedProject?.images && setCurrentImageIndex((prev) => (prev - 1 + selectedProject.images!.length) % selectedProject.images!.length);
+  const nextProject = () => {
+    setActiveProjectIndex((prev) => (prev + 1) % currentProjects.length);
+    setCurrentImageIndex(0);
+  };
+
+  const prevProject = () => {
+    setActiveProjectIndex((prev) => (prev - 1 + currentProjects.length) % currentProjects.length);
+    setCurrentImageIndex(0);
+  };
+
+  const nextImage = () => {
+    if (!selectedProject?.images) return;
+    setCurrentImageIndex((prev) => (prev + 1) % selectedProject.images!.length);
+  };
+
+  const prevImage = () => {
+    if (!selectedProject?.images) return;
+    setCurrentImageIndex((prev) => (prev - 1 + selectedProject.images!.length) % selectedProject.images!.length);
+  };
+
+  const activeProject = currentProjects[activeProjectIndex];
 
   if (view === 'selection') {
     return (
@@ -275,18 +292,6 @@ const App: React.FC = () => {
           </div>
         </div>
       </nav>
-
-      {/* Decorative BG */}
-      {isCoffee ? (
-        <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
-           <div className="absolute top-20 left-10 w-32 h-32 border-4 border-[#8b4513] rounded-full"></div>
-           <div className="absolute bottom-40 right-20 w-64 h-64 border-2 border-[#8b4513] rounded-sm rotate-12"></div>
-        </div>
-      ) : (
-        <div className="fixed inset-0 pointer-events-none opacity-[0.05] overflow-hidden">
-           <div className="absolute inset-0 bg-[linear-gradient(rgba(100,255,218,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(100,255,218,0.1)_1px,transparent_1px)] bg-[size:40px_40px]"></div>
-        </div>
-      )}
 
       {/* Hero */}
       <header className="pt-48 pb-20 px-6 max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
@@ -399,47 +404,289 @@ const App: React.FC = () => {
       </Section>
 
       <Section id="projetos" title={ui.headings.questLog[lang]} theme={theme}>
-        <div ref={projectsRef} className="relative py-10">
-          <div className="absolute top-1/2 -translate-y-1/2 -left-4 md:-left-20 lg:-left-28 z-30">
-            <button onClick={prevProject} className={`p-5 rounded-full transition-all border-4 shadow-xl ${isCoffee ? 'bg-[#5c3c21] text-white border-[#8b4513]' : 'bg-[#64ffda] text-[#0a192f] border-white/20'}`}><ChevronLeft size={40} /></button>
+        <div ref={projectsRef} className="relative max-w-4xl mx-auto py-10">
+          
+          {/* Carousel Navigation */}
+          <div className="absolute top-1/2 -translate-y-1/2 -left-4 md:-left-16 lg:-left-24 z-30">
+            <button 
+              onClick={prevProject}
+              className={`p-4 md:p-5 rounded-full transition-all duration-300 hover:scale-110 active:scale-90 border-4 shadow-2xl group/nav
+                ${isCoffee ? 
+                  'bg-[#5c3c21] text-white border-[#8b4513] hover:bg-[#8b4513] shadow-[#5c3c21]/40' : 
+                  'bg-[#64ffda] text-[#0a192f] border-white/20 hover:shadow-[0_0_30px_rgba(100,255,218,0.6)]'
+                }
+              `}
+            >
+              <ChevronLeft size={32} />
+            </button>
           </div>
-          <div className="absolute top-1/2 -translate-y-1/2 -right-4 md:-right-20 lg:-right-28 z-30">
-            <button onClick={nextProject} className={`p-5 rounded-full transition-all border-4 shadow-xl ${isCoffee ? 'bg-[#5c3c21] text-white border-[#8b4513]' : 'bg-[#64ffda] text-[#0a192f] border-white/20'}`}><ChevronRight size={40} /></button>
+          <div className="absolute top-1/2 -translate-y-1/2 -right-4 md:-right-16 lg:-right-24 z-30">
+            <button 
+              onClick={nextProject}
+              className={`p-4 md:p-5 rounded-full transition-all duration-300 hover:scale-110 active:scale-90 border-4 shadow-2xl group/nav
+                ${isCoffee ? 
+                  'bg-[#5c3c21] text-white border-[#8b4513] hover:bg-[#8b4513] shadow-[#5c3c21]/40' : 
+                  'bg-[#64ffda] text-[#0a192f] border-white/20 hover:shadow-[0_0_30px_rgba(100,255,218,0.6)]'
+                }
+              `}
+            >
+              <ChevronRight size={32} />
+            </button>
           </div>
-          {currentProjects[activeProjectIndex] && (
-            <div onClick={() => setSelectedProject(currentProjects[activeProjectIndex])} className={`relative rounded-3xl overflow-hidden cursor-pointer theme-transition border-4 ${isCoffee ? 'bg-[#fdf6e3] border-[#8b4513] shadow-2xl' : 'bg-[#112240] border-[#64ffda] shadow-[0_0_50px_rgba(100,255,218,0.1)]'}`}>
-              <div className="flex flex-col md:flex-row min-h-[500px]">
-                <div className="w-full md:w-1/2 p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-current opacity-90">
-                  <div><h3 className="text-4xl md:text-5xl font-black mb-6 uppercase tracking-tighter">{currentProjects[activeProjectIndex].title}</h3><ul className="space-y-4">{currentProjects[activeProjectIndex].description[lang].map((d, i) => <li key={i} className="text-lg opacity-80 leading-snug">• {d}</li>)}</ul></div>
-                  <div className="flex flex-wrap gap-2 mt-8">{currentProjects[activeProjectIndex].tech.map((t, i) => <span key={i} className="text-[10px] font-black uppercase px-2 py-1 rounded border border-current opacity-60">{t}</span>)}</div>
+
+          {/* Active Project Card */}
+          {activeProject && (
+            <div 
+              onClick={() => setSelectedProject(activeProject)}
+              className={`relative w-full rounded-3xl overflow-hidden transition-all duration-700 cursor-pointer animate-in zoom-in-95 fade-in border-4
+                ${isCoffee ? 
+                  'bg-[#fdf6e3] border-[#8b4513] shadow-[10px_10px_0px_rgba(139,69,19,0.2)]' : 
+                  'bg-[#112240] border-[#64ffda] shadow-[0_0_40px_rgba(100,255,218,0.1)]'
+                }
+              `}
+            >
+              <div className="flex flex-col md:flex-row min-h-[400px]">
+                
+                {/* Left Side: Info & Visual */}
+                <div className="w-full md:w-3/5 p-6 md:p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-current border-opacity-20">
+                  <div className="relative">
+                    <div className="flex items-center gap-2 mb-4">
+                      <Trophy className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
+                      <span className="text-[10px] font-black uppercase tracking-[0.3em] opacity-60">{activeProject.rpgStats.questLevel} MISSION</span>
+                    </div>
+                    
+                    <h3 className={`text-2xl md:text-4xl font-black mb-4 uppercase tracking-tighter leading-tight ${isCoffee ? 'font-["Playfair_Display"]' : 'font-["JetBrains_Mono"]'}`}>
+                      {activeProject.title}
+                    </h3>
+                    
+                    <div className="flex items-center gap-2 mb-6 opacity-60 font-mono text-xs">
+                      <Calendar size={14} /> {activeProject.date}
+                    </div>
+
+                    <div className="space-y-4 mb-8">
+                      {activeProject.description[lang].map((desc, di) => (
+                        <p key={di} className="text-base md:text-lg leading-snug opacity-90 flex gap-3">
+                          <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>●</span>
+                          {desc}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {activeProject.tech.map((t, ti) => (
+                      <span key={ti} className={`text-[9px] font-black uppercase px-2 py-1 rounded-lg border border-current border-opacity-30`}>
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <div className="w-full md:w-1/2 p-10 flex flex-col justify-center opacity-80">
-                  <div className="grid grid-cols-2 gap-8">{Object.entries(currentProjects[activeProjectIndex].rpgStats).map(([key, val], i) => val && typeof val === 'object' && <div key={i}><div className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-1">{key}</div><div className="text-lg font-bold">{(val as any)[lang]}</div></div>)}</div>
-                  <div className="mt-12 text-center text-[10px] font-black uppercase animate-pulse flex items-center justify-center gap-2">{ui.stats.inspect[lang]} <ArrowRight size={14} /></div>
+
+                {/* Right Side: Stats & Image Preview */}
+                <div className={`w-full md:w-2/5 flex flex-col ${isCoffee ? 'bg-[#5c3c21]/5' : 'bg-[#0a192f]/40'}`}>
+                  {/* Image Preview Overlay */}
+                  <div className="relative h-48 md:h-[180px] overflow-hidden group/img">
+                    {activeProject.images && activeProject.images.length > 0 && (
+                      <img 
+                        src={activeProject.images[0]} 
+                        alt={activeProject.title} 
+                        className="w-full h-full object-cover grayscale opacity-40 group-hover/img:grayscale-0 group-hover/img:opacity-100 transition-all duration-700"
+                      />
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+                  </div>
+
+                  <div className="p-6 md:p-8 flex flex-col justify-center flex-grow">
+                    <h4 className="text-[9px] uppercase font-black tracking-widest mb-6 opacity-40 flex items-center gap-2">
+                       {isCoffee ? <ScrollText size={14} /> : <Monitor size={14} />} 
+                       Quest Stats
+                    </h4>
+
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-6">
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                          <Star size={14} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">{ui.stats.xp[lang]}</span>
+                        </div>
+                        <div className="text-base font-bold">{activeProject.rpgStats.xpGained[lang]}</div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                          <Clock size={14} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">{ui.stats.mana[lang]}</span>
+                        </div>
+                        <div className="text-base font-bold">{activeProject.rpgStats.manaCost[lang]}</div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                          <Zap size={14} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">{ui.stats.difficulty[lang]}</span>
+                        </div>
+                        <div className="text-base font-bold">{activeProject.rpgStats.questLevel}</div>
+                      </div>
+
+                      <div>
+                        <div className="flex items-center gap-1.5 mb-1 opacity-50">
+                          <Skull size={14} />
+                          <span className="text-[9px] font-black uppercase tracking-widest">{ui.stats.class[lang]}</span>
+                        </div>
+                        <div className="text-base font-bold">{activeProject.rpgStats.techClass[lang]}</div>
+                      </div>
+                    </div>
+
+                    <div className="mt-8 text-center">
+                       <div className={`inline-flex items-center gap-2 px-4 py-1.5 rounded-full font-black text-[10px] uppercase border-2 animate-pulse ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21]' : 'border-[#64ffda] text-[#64ffda]'}`}>
+                          {ui.stats.inspect[lang]} <ArrowRight size={14} />
+                       </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           )}
+
+          {/* Indicators */}
+          <div className="mt-8 flex justify-center gap-3">
+            {currentProjects.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setActiveProjectIndex(i)}
+                className={`h-1.5 transition-all duration-500 rounded-full ${activeProjectIndex === i ? (isCoffee ? 'bg-[#5c3c21] w-12' : 'bg-[#64ffda] w-12') : 'bg-current opacity-20 w-3 hover:opacity-40'}`}
+              />
+            ))}
+          </div>
         </div>
       </Section>
 
       {/* Project Modal */}
       {selectedProject && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-6 md:p-12">
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setSelectedProject(null)}></div>
-          <div className={`relative w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl p-8 md:p-12 border-4 ${isCoffee ? 'bg-[#fdf6e3] border-[#8b4513]' : 'bg-[#0a192f] border-[#64ffda]'}`}>
-            <button onClick={() => setSelectedProject(null)} className={`absolute top-8 right-8 p-2 rounded-full z-10 ${isCoffee ? 'bg-[#5c3c21] text-white' : 'bg-[#64ffda] text-[#0a192f]'}`}><X size={24} /></button>
-            <div className="flex flex-col md:flex-row gap-12">
-              <div className="w-full md:w-1/2 relative aspect-video rounded-2xl overflow-hidden border-2 border-current border-opacity-20 bg-black">
-                {selectedProject.images?.map((img, i) => <img key={i} src={img} className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === currentImageIndex ? 'opacity-100' : 'opacity-0'}`} />)}
-                {selectedProject.images && selectedProject.images.length > 1 && (
-                  <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">{selectedProject.images.map((_, i) => <button key={i} onClick={() => setCurrentImageIndex(i)} className={`w-3 h-3 rounded-full border-2 transition-all ${i === currentImageIndex ? 'bg-white border-white scale-125' : 'bg-transparent border-white/50'}`} />)}</div>
-                )}
-              </div>
-              <div className="w-full md:w-1/2">
-                <h2 className="text-4xl md:text-5xl font-black mb-8 leading-tight">{selectedProject.title}</h2>
-                <p className="text-lg opacity-80 leading-relaxed mb-10">{selectedProject.longDescription[lang]}</p>
-                {selectedProject.githubUrl && <a href={selectedProject.githubUrl} target="_blank" className={`inline-flex items-center gap-4 px-8 py-4 rounded-xl font-black transition-all ${isCoffee ? 'bg-[#5c3c21] text-white' : 'bg-[#64ffda] text-[#0a192f]'}`}><Github size={20} /> {ui.modal.github[lang]}</a>}
+        <div className="fixed inset-0 z-[1000] flex items-center justify-center p-2 md:p-8 overflow-hidden">
+          <div 
+            className="absolute inset-0 bg-black/90 backdrop-blur-xl animate-in fade-in duration-500" 
+            onClick={() => setSelectedProject(null)}
+          ></div>
+          
+          <div className={`relative w-full max-w-6xl max-h-[92vh] overflow-y-auto rounded-[1.5rem] md:rounded-[2.5rem] shadow-2xl border-4 theme-transition flex flex-col animate-in zoom-in-95 duration-500
+            ${isCoffee ? 'bg-[#fdf6e3] border-[#8b4513]' : 'bg-[#0a192f] border-[#64ffda]'}
+          `}>
+            
+            {/* Header / Close */}
+            <div className="sticky top-0 right-0 p-4 md:p-8 flex justify-end z-[1100] pointer-events-none">
+              <button 
+                onClick={() => setSelectedProject(null)}
+                className={`p-3 md:p-4 rounded-full pointer-events-auto transition-all hover:scale-110 active:scale-90 shadow-xl
+                  ${isCoffee ? 'bg-[#5c3c21] text-white' : 'bg-[#64ffda] text-[#0a192f] shadow-[0_0_20px_#64ffda/40]'}
+                `}
+              >
+                <X size={24} className="md:w-8 md:h-8" />
+              </button>
+            </div>
+
+            <div className="px-6 md:px-16 pb-12 md:pb-20 -mt-8 md:-mt-16">
+              <div className="flex flex-col md:flex-row gap-8 md:gap-16">
+                
+                {/* Visual Area (Images Carousel) */}
+                <div className="w-full md:w-1/2 flex flex-col">
+                  <div className={`relative aspect-video rounded-2xl md:rounded-3xl overflow-hidden border-2 md:border-4 shadow-2xl bg-black
+                    ${isCoffee ? 'border-[#5c3c21]/20' : 'border-[#64ffda]/20'}
+                  `}>
+                    {selectedProject.images && selectedProject.images.length > 0 ? (
+                      <>
+                        {selectedProject.images.map((img, idx) => (
+                          <img 
+                            key={idx}
+                            src={img} 
+                            className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ease-in-out
+                              ${idx === currentImageIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110 pointer-events-none'}
+                            `}
+                          />
+                        ))}
+                        
+                        {selectedProject.images.length > 1 && (
+                          <div className="absolute inset-0 flex items-center justify-between px-4 opacity-0 hover:opacity-100 transition-opacity">
+                            <button onClick={prevImage} className={`p-2 rounded-full shadow-lg ${isCoffee ? 'bg-white/90 text-[#5c3c21]' : 'bg-[#0a192f]/90 text-[#64ffda]'}`}><ChevronLeft size={20} /></button>
+                            <button onClick={nextImage} className={`p-2 rounded-full shadow-lg ${isCoffee ? 'bg-white/90 text-[#5c3c21]' : 'bg-[#0a192f]/90 text-[#64ffda]'}`}><ChevronRight size={20} /></button>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center opacity-20"><Monitor size={60} /></div>
+                    )}
+                  </div>
+
+                  {/* Image Thumbnails / Indicators */}
+                  {selectedProject.images && selectedProject.images.length > 1 && (
+                    <div className="flex justify-center gap-2 mt-4 md:mt-8">
+                      {selectedProject.images.map((_, i) => (
+                        <button 
+                          key={i} 
+                          onClick={() => setCurrentImageIndex(i)} 
+                          className={`h-1.5 transition-all duration-500 rounded-full ${i === currentImageIndex ? (isCoffee ? 'bg-[#5c3c21] w-8 md:w-10' : 'bg-[#64ffda] w-8 md:w-10') : 'bg-current opacity-20 w-1.5 md:w-2'}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+
+                  <div className="mt-8 md:mt-12 grid grid-cols-2 gap-4 md:gap-10">
+                    <div className="p-4 md:p-8 rounded-xl md:rounded-2xl border-2 border-current border-opacity-10">
+                      <div className="flex items-center gap-2 mb-1 opacity-50">
+                        <Trophy size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">Mastery</span>
+                      </div>
+                      <div className="text-lg md:text-2xl font-bold">{selectedProject.rpgStats.xpGained[lang]}</div>
+                    </div>
+                    <div className="p-4 md:p-8 rounded-xl md:rounded-2xl border-2 border-current border-opacity-10">
+                      <div className="flex items-center gap-2 mb-1 opacity-50">
+                        <History size={14} className="md:w-[18px] md:h-[18px]" />
+                        <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest">Quest Level</span>
+                      </div>
+                      <div className="text-lg md:text-2xl font-bold">{selectedProject.rpgStats.questLevel}</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Info Area */}
+                <div className="w-full md:w-1/2">
+                  <div className="flex items-center gap-2 mb-2 opacity-50">
+                    <Calendar size={14} className="md:w-[18px] md:h-[18px]" />
+                    <span className="text-[10px] md:text-xs font-bold uppercase tracking-widest">{selectedProject.date}</span>
+                  </div>
+                  <h2 className={`text-3xl md:text-5xl lg:text-6xl font-black mb-6 md:mb-10 tracking-tighter leading-none ${isCoffee ? 'font-["Playfair_Display"] text-[#5c3c21]' : 'text-[#64ffda] font-["JetBrains_Mono"]'}`}>
+                    {selectedProject.title}
+                  </h2>
+                  
+                  <div className={`mb-8 md:mb-12 text-lg md:text-xl lg:text-2xl leading-relaxed opacity-90 ${isCoffee ? 'font-serif italic' : 'font-mono'}`}>
+                    {selectedProject.longDescription[lang]}
+                  </div>
+
+                  <div className="mb-8 md:mb-12">
+                    <h4 className="text-[9px] md:text-[10px] uppercase font-black tracking-[0.3em] mb-4 opacity-40">Artifact Tech Stack</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedProject.tech.map((t, ti) => (
+                        <span key={ti} className={`px-3 py-1.5 rounded-lg text-[10px] md:text-sm font-bold border-2 theme-transition ${isCoffee ? 'border-[#5c3c21]/20 bg-[#5c3c21]/5 text-[#5c3c21]' : 'border-[#64ffda]/20 bg-[#64ffda]/5 text-[#64ffda]'}`}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    {selectedProject.githubUrl && (
+                      <a 
+                        href={selectedProject.githubUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className={`flex-grow flex items-center justify-center gap-3 py-4 md:py-5 rounded-xl md:rounded-2xl font-black text-xs md:text-sm uppercase tracking-widest transition-all hover:scale-105 active:scale-95 shadow-xl
+                          ${isCoffee ? 'bg-[#5c3c21] text-white shadow-[#5c3c21]/20' : 'bg-[#64ffda] text-[#0a192f] shadow-[0_0_25px_#64ffda/30]'}
+                        `}
+                      >
+                        <Github size={20} /> {ui.modal.github[lang]}
+                      </a>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -453,7 +700,9 @@ const App: React.FC = () => {
             <h2 className="text-4xl font-black mb-6 uppercase tracking-tighter">G. FLORIANO</h2>
             <p className="text-lg opacity-60 leading-relaxed mb-10 max-w-md">{ui.footer.discuss[lang]}</p>
             <div className="flex gap-6">
-              {[<Github size={24} />, <Linkedin size={24} />, <Mail size={24} />].map((icon, i) => <button key={i} className="hover:scale-110 transition-transform opacity-70 hover:opacity-100">{icon}</button>)}
+              <a href={PERSONAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform opacity-70 hover:opacity-100"><Github size={24} /></a>
+              <a href={PERSONAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform opacity-70 hover:opacity-100"><Linkedin size={24} /></a>
+              <a href={`mailto:${PERSONAL_INFO.email}`} className="hover:scale-110 transition-transform opacity-70 hover:opacity-100"><Mail size={24} /></a>
             </div>
           </div>
           <div>
