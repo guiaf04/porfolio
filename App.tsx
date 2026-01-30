@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Theme, Project, SkillItem } from './types';
+import { Theme, Project, SkillItem, Language } from './types';
 import { PERSONAL_INFO, EXPERIENCES, PROJECTS, COFFEE_SKILLS, HARDWARE_SKILLS } from './data';
 import ThemeToggle from './components/ThemeToggle';
 import Section from './components/Section';
@@ -8,7 +8,6 @@ import {
   Github, 
   Linkedin, 
   Mail, 
-  ExternalLink, 
   Calendar, 
   MapPin, 
   Coffee as CoffeeIcon, 
@@ -19,7 +18,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Zap, 
-  ShieldCheck, 
   Cpu,
   Sword,
   Sparkles,
@@ -30,13 +28,15 @@ import {
   Skull,
   Trophy,
   ScrollText,
-  Monitor
+  Monitor,
+  Globe
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
 const App: React.FC = () => {
   const [view, setView] = useState<'selection' | 'portfolio'>('selection');
   const [theme, setTheme] = useState<Theme>(Theme.COFFEE);
+  const [lang, setLang] = useState<Language>('pt');
   const isCoffee = theme === Theme.COFFEE;
 
   // Selected Project for Modal
@@ -57,6 +57,53 @@ const App: React.FC = () => {
   const [aiQuestion, setAiQuestion] = useState("");
   const [aiResponse, setAiResponse] = useState("");
   const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // UI Translations
+  const ui = {
+    selection: {
+      barista: { pt: "O Barista", en: "The Barista" },
+      architect: { pt: "O Arquiteto", en: "The Architect" },
+      select: { pt: "SELECIONAR PERSONAGEM", en: "SELECT CHARACTER" },
+      vs: { pt: "VS", en: "VS" }
+    },
+    headings: {
+      resumo: { pt: "Resumo", en: "Summary" },
+      trajetoria: { pt: "Trajetória", en: "Path" },
+      techStack: { pt: "Tech Stack", en: "Tech Stack" },
+      questLog: { pt: "Quest Log", en: "Quest Log" }
+    },
+    ai: {
+      label: { pt: isCoffee ? "Assistente Barista" : "Assistente Binário", en: isCoffee ? "Barista Assistant" : "Binary Assistant" },
+      placeholder: { pt: isCoffee ? "Ex: Como ele usa Kafka?" : "Ex: Qual sua experiência com FPGAs?", en: isCoffee ? "Ex: How does he use Kafka?" : "Ex: What's his experience with FPGAs?" },
+      error: { pt: "Erro ao conectar com a IA.", en: "Error connecting to AI." }
+    },
+    stats: {
+      xp: { pt: "XP Ganho", en: "XP Gained" },
+      mana: { pt: "Mana / Tempo", en: "Mana / Time" },
+      difficulty: { pt: "Dificuldade", en: "Difficulty" },
+      class: { pt: "Classe", en: "Class" },
+      completion: { pt: "Progresso", en: "Progress" },
+      inspect: { pt: "Clique para inspecionar missão", en: "Click to inspect quest" },
+      level: { pt: "NÍVEL", en: "LEVEL" }
+    },
+    footer: {
+      collab: { pt: "Interessado em colaborar?", en: "Interested in collaborating?" },
+      discuss: { 
+        pt: `Sinta-se à vontade para entrar em contato para discutir ${isCoffee ? 'backend distribuído' : 'sistemas de tempo real'}.`,
+        en: `Feel free to reach out to discuss ${isCoffee ? 'distributed backend' : 'real-time systems'}.`
+      },
+      note: {
+        pt: isCoffee ? "Processado com Java & Grãos Selecionados." : "Compiled for speed.",
+        en: isCoffee ? "Processed with Java & Selected Grains." : "Compiled for speed."
+      }
+    },
+    modal: {
+      techStack: { pt: "Stack Tecnológica", en: "Technology Stack" },
+      github: { pt: "Ver no Github", en: "View on Github" }
+    }
+  };
+
+  const toggleLang = () => setLang(prev => prev === 'pt' ? 'en' : 'pt');
 
   const toggleTheme = () => {
     setTheme(prev => prev === Theme.COFFEE ? Theme.HARDWARE : Theme.COFFEE);
@@ -117,8 +164,9 @@ const App: React.FC = () => {
         Você é o assistente virtual do Guilherme Araújo Floriano.
         Informações contextuais:
         Nome: ${PERSONAL_INFO.name}
+        Idioma de resposta: ${lang === 'pt' ? 'Português' : 'Inglês'}
         Tema atual visualizado pelo usuário: ${isCoffee ? 'Backend Java/Cafeteria' : 'Sistemas Embarcados/Hardware'}
-        Resumo: ${isCoffee ? PERSONAL_INFO.summary.coffee : PERSONAL_INFO.summary.hardware}
+        Resumo: ${isCoffee ? PERSONAL_INFO.summary.coffee[lang] : PERSONAL_INFO.summary.hardware[lang]}
         Experiência: ${JSON.stringify(EXPERIENCES)}
         Projetos de ${theme}: ${JSON.stringify(currentProjects)}
         Habilidades de ${theme}: ${JSON.stringify(currentSkills)}
@@ -134,10 +182,10 @@ const App: React.FC = () => {
         }
       });
       
-      setAiResponse(response.text || "Desculpe, não consegui processar isso.");
+      setAiResponse(response.text || (lang === 'pt' ? "Desculpe, não consegui processar isso." : "Sorry, I couldn't process that."));
     } catch (err) {
       console.error(err);
-      setAiResponse("Erro ao conectar com a IA.");
+      setAiResponse(ui.ai.error[lang]);
     } finally {
       setIsAiLoading(false);
     }
@@ -164,6 +212,13 @@ const App: React.FC = () => {
   if (view === 'selection') {
     return (
       <div className="fixed inset-0 z-[1000] bg-[#050505] flex flex-col md:flex-row overflow-hidden font-['JetBrains_Mono']">
+        <button 
+          onClick={toggleLang}
+          className="absolute top-6 left-6 z-[1100] flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-full border border-white/20 transition-all backdrop-blur-md"
+        >
+          <Globe size={16} /> {lang.toUpperCase()}
+        </button>
+
         {/* JAVA / COFFEE SIDE */}
         <div 
           onClick={() => startPortfolio(Theme.COFFEE)}
@@ -176,28 +231,11 @@ const App: React.FC = () => {
             <div className="mb-8 p-8 rounded-full border-4 border-[#8b4513] text-[#8b4513] group-hover:scale-110 group-hover:bg-[#8b4513] group-hover:text-white transition-all duration-500 shadow-[0_0_30px_rgba(139,69,19,0.2)]">
               <CoffeeIcon size={80} />
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-[#fdf6e3] mb-4 tracking-tighter uppercase">O Barista</h2>
+            <h2 className="text-4xl md:text-6xl font-black text-[#fdf6e3] mb-4 tracking-tighter uppercase">{ui.selection.barista[lang]}</h2>
             <p className="text-[#8b4513] font-bold text-xl mb-8">JAVA BACKEND DEVELOPER</p>
             
-            <div className="w-full max-w-xs space-y-4 opacity-0 group-hover:opacity-100 translate-y-10 group-hover:translate-y-0 transition-all duration-500">
-               <div className="flex justify-between items-end mb-1">
-                 <span className="text-white text-xs">SCALABILITY</span>
-                 <span className="text-[#8b4513] text-xs">99%</span>
-               </div>
-               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                 <div className="h-full bg-[#8b4513] w-[99%]"></div>
-               </div>
-               <div className="flex justify-between items-end mb-1">
-                 <span className="text-white text-xs">STABILITY</span>
-                 <span className="text-[#8b4513] text-xs">100%</span>
-               </div>
-               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                 <div className="h-full bg-[#8b4513] w-full"></div>
-               </div>
-            </div>
-
             <div className="mt-12 px-8 py-3 bg-white text-black font-black tracking-widest group-hover:scale-105 transition-transform">
-              SELECT CHARACTER
+              {ui.selection.select[lang]}
             </div>
           </div>
         </div>
@@ -214,35 +252,17 @@ const App: React.FC = () => {
             <div className="mb-8 p-8 rounded-full border-4 border-[#64ffda] text-[#64ffda] group-hover:scale-110 group-hover:bg-[#64ffda] group-hover:text-[#0a192f] transition-all duration-500 shadow-[0_0_30px_rgba(100,255,218,0.3)]">
               <Cpu size={80} />
             </div>
-            <h2 className="text-4xl md:text-6xl font-black text-[#ccd6f6] mb-4 tracking-tighter uppercase">O Arquiteto</h2>
+            <h2 className="text-4xl md:text-6xl font-black text-[#ccd6f6] mb-4 tracking-tighter uppercase">{ui.selection.architect[lang]}</h2>
             <p className="text-[#64ffda] font-bold text-xl mb-8">EMBEDDED SYSTEMS ENGINEER</p>
             
-            <div className="w-full max-w-xs space-y-4 opacity-0 group-hover:opacity-100 translate-y-10 group-hover:translate-y-0 transition-all duration-500">
-               <div className="flex justify-between items-end mb-1">
-                 <span className="text-white text-xs">LOW LATENCY</span>
-                 <span className="text-[#64ffda] text-xs">MAX</span>
-               </div>
-               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                 <div className="h-full bg-[#64ffda] w-full"></div>
-               </div>
-               <div className="flex justify-between items-end mb-1">
-                 <span className="text-white text-xs">PRECISION</span>
-                 <span className="text-[#64ffda] text-xs">99%</span>
-               </div>
-               <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                 <div className="h-full bg-[#64ffda] w-[99%]"></div>
-               </div>
-            </div>
-
             <div className="mt-12 px-8 py-3 bg-[#64ffda] text-[#0a192f] font-black tracking-widest group-hover:scale-105 transition-transform">
-              SELECT CHARACTER
+              {ui.selection.select[lang]}
             </div>
           </div>
         </div>
 
-        {/* Center Divider Text */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none hidden md:block">
-           <div className="bg-white text-black px-4 py-2 font-black text-2xl rotate-[-5deg] shadow-[5px_5px_0px_#8b4513]">VS</div>
+           <div className="bg-white text-black px-4 py-2 font-black text-2xl rotate-[-5deg] shadow-[5px_5px_0px_#8b4513]">{ui.selection.vs[lang]}</div>
         </div>
       </div>
     );
@@ -266,6 +286,16 @@ const App: React.FC = () => {
         </div>
       )}
 
+      {/* Custom Fixed Language Toggle */}
+      <div className="fixed top-24 right-6 z-50">
+        <button 
+          onClick={toggleLang}
+          className={`flex items-center gap-2 px-3 py-1.5 rounded-full border-2 transition-all font-black text-[10px] tracking-widest ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21] bg-white' : 'border-[#64ffda] text-[#64ffda] bg-[#0a192f]'}`}
+        >
+          <Globe size={14} /> {lang === 'pt' ? 'PORTUGUÊS' : 'ENGLISH'}
+        </button>
+      </div>
+
       <ThemeToggle currentTheme={theme} toggleTheme={toggleTheme} />
 
       {/* Hero Header */}
@@ -284,7 +314,7 @@ const App: React.FC = () => {
               <Linkedin size={18} /> Linkedin
             </a>
             <a href={`mailto:${PERSONAL_INFO.email}`} className={`flex items-center gap-2 px-4 py-2 rounded-full border transition-all ${isCoffee ? 'border-[#5c3c21] hover:bg-[#5c3c21] hover:text-[#fdf6e3]' : 'border-[#64ffda] text-[#64ffda] hover:bg-[#64ffda]/10'}`}>
-              <Mail size={18} /> Contato
+              <Mail size={18} /> {lang === 'pt' ? 'Contato' : 'Contact'}
             </a>
           </div>
         </div>
@@ -308,19 +338,19 @@ const App: React.FC = () => {
       </header>
 
       {/* Resumo Section */}
-      <Section id="resumo" title="Resumo" theme={theme}>
+      <Section id="resumo" title={ui.headings.resumo[lang]} theme={theme}>
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className={`text-xl md:text-2xl leading-relaxed ${isCoffee ? 'font-serif italic' : 'font-mono'}`}>
-            {isCoffee ? PERSONAL_INFO.summary.coffee : PERSONAL_INFO.summary.hardware}
+            {isCoffee ? PERSONAL_INFO.summary.coffee[lang] : PERSONAL_INFO.summary.hardware[lang]}
           </div>
           <div className={`p-6 rounded-xl ${isCoffee ? 'bg-[#5c3c21]/5' : 'bg-[#112240] border border-[#64ffda]/20'}`}>
-            <h3 className={`text-lg font-bold mb-4 ${isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}`}>Assistente {isCoffee ? 'Barista' : 'Binário'}:</h3>
+            <h3 className={`text-lg font-bold mb-4 ${isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}`}>{ui.ai.label[lang]}:</h3>
             <form onSubmit={handleAiAsk} className="flex gap-2">
               <input 
                 type="text" 
                 value={aiQuestion}
                 onChange={(e) => setAiQuestion(e.target.value)}
-                placeholder={isCoffee ? "Ex: Como ele usa Kafka?" : "Ex: Qual sua experiência com FPGAs?"}
+                placeholder={ui.ai.placeholder[lang]}
                 className={`flex-grow px-4 py-2 rounded-lg bg-transparent border outline-none transition-all ${isCoffee ? 'border-[#5c3c21]/30 focus:border-[#5c3c21]' : 'border-[#64ffda]/30 focus:border-[#64ffda]'}`}
               />
               <button disabled={isAiLoading} className={`p-2 rounded-lg transition-all ${isCoffee ? 'bg-[#5c3c21] text-white' : 'bg-[#64ffda] text-[#0a192f]'}`}>
@@ -337,7 +367,7 @@ const App: React.FC = () => {
       </Section>
 
       {/* Experiência Section */}
-      <Section id="experiencia" title="Trajetória" theme={theme}>
+      <Section id="experiencia" title={ui.headings.trajetoria[lang]} theme={theme}>
         <div className="space-y-12">
           {EXPERIENCES.map((exp, idx) => (
             <div key={idx} className="group relative">
@@ -345,7 +375,7 @@ const App: React.FC = () => {
               <div className="pl-8">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
                   <h3 className={`text-2xl font-bold ${isCoffee ? 'text-[#5c3c21]' : 'text-[#ccd6f6]'}`}>
-                    {exp.role} <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>@ {exp.company}</span>
+                    {exp.role[lang]} <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>@ {exp.company}</span>
                   </h3>
                   <span className={`text-sm font-mono opacity-60`}>{exp.period}</span>
                 </div>
@@ -353,7 +383,7 @@ const App: React.FC = () => {
                   <span className="flex items-center gap-1"><MapPin size={14} /> {exp.location}</span>
                 </div>
                 <ul className="space-y-3">
-                  {exp.description.map((item, i) => (
+                  {exp.description[lang].map((item, i) => (
                     <li key={i} className="flex gap-3 text-lg leading-relaxed opacity-80">
                       <span className={`mt-2 h-1.5 w-1.5 rounded-full flex-shrink-0 ${isCoffee ? 'bg-[#8b4513]' : 'bg-[#64ffda]'}`}></span>
                       {item}
@@ -367,12 +397,12 @@ const App: React.FC = () => {
       </Section>
 
       {/* Competências Section */}
-      <Section id="competencias" title="Tech Stack" theme={theme}>
+      <Section id="competencias" title={ui.headings.techStack[lang]} theme={theme}>
         <div className="grid md:grid-cols-2 gap-12">
           {currentSkills.map((cat, idx) => (
             <div key={idx} className="space-y-6">
               <h3 className={`text-2xl font-black mb-8 border-l-4 pl-4 ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21]' : 'border-[#64ffda] text-[#64ffda]'}`}>
-                {cat.category}
+                {cat.category[lang]}
               </h3>
               <div className="flex flex-wrap gap-4">
                 {cat.items.map((skill, si) => (
@@ -402,7 +432,7 @@ const App: React.FC = () => {
                         <div className="flex items-center justify-between mb-4 border-b pb-2 border-current">
                            <span className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
                              {isCoffee ? <Sparkles size={14} /> : <Activity size={14} />}
-                             LEVEL: {skill.level}
+                             {ui.stats.level[lang]}: {skill.level}
                            </span>
                            <X 
                              size={16} 
@@ -411,7 +441,7 @@ const App: React.FC = () => {
                            />
                         </div>
                         <ul className="space-y-3">
-                           {skill.details?.map((detail, di) => (
+                           {skill.details?.[lang].map((detail, di) => (
                              <li key={di} className="text-sm flex gap-2">
                                <span className="flex-shrink-0">{isCoffee ? '🛡️' : '>>'}</span>
                                {detail}
@@ -429,7 +459,7 @@ const App: React.FC = () => {
       </Section>
 
       {/* Projetos Section - QUEST LOG CAROUSEL */}
-      <Section id="projetos" title="Quest Log" theme={theme}>
+      <Section id="projetos" title={ui.headings.questLog[lang]} theme={theme}>
         <div ref={projectsRef} className="relative max-w-5xl mx-auto py-10">
           
           {/* Carousel Navigation */}
@@ -451,109 +481,111 @@ const App: React.FC = () => {
           </div>
 
           {/* Active Quest Card */}
-          <div 
-            onClick={() => setSelectedProject(activeProject)}
-            className={`relative w-full rounded-3xl overflow-hidden transition-all duration-700 cursor-pointer animate-in zoom-in-95 fade-in
-              ${isCoffee ? 
-                'bg-[#fdf6e3] border-4 border-[#8b4513] shadow-[15px_15px_0px_rgba(139,69,19,0.2)]' : 
-                'bg-[#112240] border-2 border-[#64ffda] shadow-[0_0_50px_rgba(100,255,218,0.1)]'
-              }
-            `}
-          >
-            <div className="flex flex-col md:flex-row min-h-[500px]">
-              
-              {/* Left Side: Visual / Header */}
-              <div className="w-full md:w-1/2 p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-current opacity-90">
-                <div>
-                  <div className="flex items-center gap-2 mb-4">
-                    <Trophy className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={24} />
-                    <span className="text-xs font-black uppercase tracking-[0.3em]">{activeProject.rpgStats.questLevel} QUEST</span>
+          {activeProject && (
+            <div 
+              onClick={() => setSelectedProject(activeProject)}
+              className={`relative w-full rounded-3xl overflow-hidden transition-all duration-700 cursor-pointer animate-in zoom-in-95 fade-in
+                ${isCoffee ? 
+                  'bg-[#fdf6e3] border-4 border-[#8b4513] shadow-[15px_15px_0px_rgba(139,69,19,0.2)]' : 
+                  'bg-[#112240] border-2 border-[#64ffda] shadow-[0_0_50px_rgba(100,255,218,0.1)]'
+                }
+              `}
+            >
+              <div className="flex flex-col md:flex-row min-h-[500px]">
+                
+                {/* Left Side: Visual / Header */}
+                <div className="w-full md:w-1/2 p-8 flex flex-col justify-between border-b md:border-b-0 md:border-r border-current opacity-90">
+                  <div>
+                    <div className="flex items-center gap-2 mb-4">
+                      <Trophy className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={24} />
+                      <span className="text-xs font-black uppercase tracking-[0.3em]">{activeProject.rpgStats.questLevel} QUEST</span>
+                    </div>
+                    <h3 className={`text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter ${isCoffee ? 'font-["Playfair_Display"]' : 'font-["JetBrains_Mono"]'}`}>
+                      {activeProject.title}
+                    </h3>
+                    <div className="flex items-center gap-2 mb-8 text-sm font-mono opacity-60">
+                      <Calendar size={14} /> {activeProject.date}
+                    </div>
+                    
+                    <ul className="space-y-4 mb-8">
+                      {activeProject.description[lang].map((desc, di) => (
+                        <li key={di} className="flex gap-3 text-lg leading-tight">
+                          <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>{isCoffee ? '✒️' : '>>'}</span>
+                          {desc}
+                        </li>
+                      ))}
+                    </ul>
                   </div>
-                  <h3 className={`text-4xl md:text-6xl font-black mb-6 uppercase tracking-tighter ${isCoffee ? 'font-["Playfair_Display"]' : 'font-["JetBrains_Mono"]'}`}>
-                    {activeProject.title}
-                  </h3>
-                  <div className="flex items-center gap-2 mb-8 text-sm font-mono opacity-60">
-                    <Calendar size={14} /> {activeProject.date}
-                  </div>
-                  
-                  <ul className="space-y-4 mb-8">
-                    {activeProject.description.map((desc, di) => (
-                      <li key={di} className="flex gap-3 text-lg leading-tight">
-                        <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>{isCoffee ? '✒️' : '>>'}</span>
-                        {desc}
-                      </li>
+
+                  <div className="flex flex-wrap gap-2">
+                    {activeProject.tech.map((t, ti) => (
+                      <span key={ti} className={`text-[10px] font-black uppercase px-2 py-1 rounded border border-current opacity-70`}>
+                        {t}
+                      </span>
                     ))}
-                  </ul>
-                </div>
-
-                <div className="flex flex-wrap gap-2">
-                  {activeProject.tech.map((t, ti) => (
-                    <span key={ti} className={`text-[10px] font-black uppercase px-2 py-1 rounded border border-current opacity-70`}>
-                      {t}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              {/* Right Side: RPG STATS PANEL */}
-              <div className={`w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center ${isCoffee ? 'bg-[#5c3c21]/5' : 'bg-[#0a192f]/30'}`}>
-                <h4 className="text-xs uppercase font-black tracking-widest mb-10 opacity-50 flex items-center gap-2">
-                  {isCoffee ? <ScrollText size={16} /> : <Monitor size={16} />} 
-                  Project Characteristics
-                </h4>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                  <div className="group">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Star className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">XP Gained</span>
-                    </div>
-                    <div className="text-xl font-bold">{activeProject.rpgStats.xpGained}</div>
-                  </div>
-
-                  <div className="group">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Clock className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">Mana / Time</span>
-                    </div>
-                    <div className="text-xl font-bold">{activeProject.rpgStats.manaCost}</div>
-                  </div>
-
-                  <div className="group">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Zap className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">Difficulty</span>
-                    </div>
-                    <div className="text-xl font-bold">{activeProject.rpgStats.questLevel}</div>
-                  </div>
-
-                  <div className="group">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Skull className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
-                      <span className="text-xs font-black uppercase tracking-widest">Tech Class</span>
-                    </div>
-                    <div className="text-xl font-bold">{activeProject.rpgStats.techClass}</div>
                   </div>
                 </div>
 
-                <div className="mt-12 flex items-center gap-4">
-                  <div className={`flex-grow h-2 rounded-full bg-white/10 overflow-hidden`}>
-                     <div 
-                        className={`h-full transition-all duration-1000 ${isCoffee ? 'bg-[#5c3c21]' : 'bg-[#64ffda]'}`}
-                        style={{ width: activeProject.rpgStats.questLevel === 'Legendary' ? '100%' : activeProject.rpgStats.questLevel === 'Epic' ? '75%' : '50%' }}
-                     ></div>
-                  </div>
-                  <span className="text-xs font-black opacity-50 uppercase">Completion</span>
-                </div>
+                {/* Right Side: RPG STATS PANEL */}
+                <div className={`w-full md:w-1/2 p-8 md:p-12 flex flex-col justify-center ${isCoffee ? 'bg-[#5c3c21]/5' : 'bg-[#0a192f]/30'}`}>
+                  <h4 className="text-xs uppercase font-black tracking-widest mb-10 opacity-50 flex items-center gap-2">
+                    {isCoffee ? <ScrollText size={16} /> : <Monitor size={16} />} 
+                    Project Characteristics
+                  </h4>
 
-                <div className="mt-12 flex justify-center">
-                   <div className={`px-6 py-2 rounded-full font-black text-xs uppercase border-2 flex items-center gap-2 animate-pulse ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21]' : 'border-[#64ffda] text-[#64ffda]'}`}>
-                      Click to inspect quest details <ArrowRight size={14} />
-                   </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Star className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
+                        <span className="text-xs font-black uppercase tracking-widest">{ui.stats.xp[lang]}</span>
+                      </div>
+                      <div className="text-xl font-bold">{activeProject.rpgStats.xpGained[lang]}</div>
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Clock className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
+                        <span className="text-xs font-black uppercase tracking-widest">{ui.stats.mana[lang]}</span>
+                      </div>
+                      <div className="text-xl font-bold">{activeProject.rpgStats.manaCost[lang]}</div>
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Zap className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
+                        <span className="text-xs font-black uppercase tracking-widest">{ui.stats.difficulty[lang]}</span>
+                      </div>
+                      <div className="text-xl font-bold">{activeProject.rpgStats.questLevel}</div>
+                    </div>
+
+                    <div className="group">
+                      <div className="flex items-center gap-3 mb-2">
+                        <Skull className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
+                        <span className="text-xs font-black uppercase tracking-widest">{ui.stats.class[lang]}</span>
+                      </div>
+                      <div className="text-xl font-bold">{activeProject.rpgStats.techClass[lang]}</div>
+                    </div>
+                  </div>
+
+                  <div className="mt-12 flex items-center gap-4">
+                    <div className={`flex-grow h-2 rounded-full bg-white/10 overflow-hidden`}>
+                       <div 
+                          className={`h-full transition-all duration-1000 ${isCoffee ? 'bg-[#5c3c21]' : 'bg-[#64ffda]'}`}
+                          style={{ width: activeProject.rpgStats.questLevel === 'Legendary' ? '100%' : activeProject.rpgStats.questLevel === 'Epic' ? '75%' : '50%' }}
+                       ></div>
+                    </div>
+                    <span className="text-xs font-black opacity-50 uppercase">{ui.stats.completion[lang]}</span>
+                  </div>
+
+                  <div className="mt-12 flex justify-center">
+                     <div className={`px-6 py-2 rounded-full font-black text-xs uppercase border-2 flex items-center gap-2 animate-pulse ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21]' : 'border-[#64ffda] text-[#64ffda]'}`}>
+                        {ui.stats.inspect[lang]} <ArrowRight size={14} />
+                     </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* Pagination Indicators */}
           <div className="mt-8 flex justify-center gap-4">
@@ -616,22 +648,9 @@ const App: React.FC = () => {
                         </>
                       ) : (
                         <div className="w-full h-full bg-gray-200 flex items-center justify-center text-gray-400">
-                          Sem imagens disponíveis
+                          {lang === 'pt' ? 'Sem imagens' : 'No images'}
                         </div>
                       )}
-                    </div>
-                    
-                    {/* Thumbnail helper */}
-                    <div className="mt-4 flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                      {selectedProject.images?.map((img, i) => (
-                        <button
-                          key={i}
-                          onClick={() => setCurrentImageIndex(i)}
-                          className={`flex-shrink-0 w-20 aspect-video rounded-lg overflow-hidden border-2 transition-all ${currentImageIndex === i ? (isCoffee ? 'border-[#5c3c21]' : 'border-[#64ffda]') : 'border-transparent opacity-60'}`}
-                        >
-                          <img src={img} alt="thumbnail" className="w-full h-full object-cover" />
-                        </button>
-                      ))}
                     </div>
                   </div>
                 </div>
@@ -646,11 +665,11 @@ const App: React.FC = () => {
                   </h2>
                   
                   <div className={`mb-8 text-lg leading-relaxed opacity-90 ${isCoffee ? 'font-serif italic' : 'font-mono'}`}>
-                    {selectedProject.longDescription}
+                    {selectedProject.longDescription[lang]}
                   </div>
 
                   <div className="mb-8">
-                    <h4 className="text-xs uppercase tracking-widest font-bold mb-4 opacity-50">Stack Tecnológica</h4>
+                    <h4 className="text-xs uppercase tracking-widest font-bold mb-4 opacity-50">{ui.modal.techStack[lang]}</h4>
                     <div className="flex flex-wrap gap-2">
                       {selectedProject.tech.map((t, ti) => (
                         <span key={ti} className={`px-3 py-1 rounded-lg text-sm font-bold border ${isCoffee ? 'border-[#5c3c21] bg-[#5c3c21]/5 text-[#5c3c21]' : 'border-[#64ffda] bg-[#64ffda]/5 text-[#64ffda]'}`}>
@@ -668,7 +687,7 @@ const App: React.FC = () => {
                         rel="noopener noreferrer"
                         className={`flex-grow flex items-center justify-center gap-3 py-4 rounded-xl font-bold transition-all ${isCoffee ? 'bg-[#5c3c21] text-[#fdf6e3] hover:shadow-lg hover:-translate-y-1' : 'bg-[#64ffda] text-[#0a192f] hover:shadow-[0_0_20px_rgba(100,255,218,0.5)] hover:-translate-y-1'}`}
                       >
-                        <Github size={20} /> Ver no Github
+                        <Github size={20} /> {ui.modal.github[lang]}
                       </a>
                     )}
                   </div>
@@ -682,15 +701,15 @@ const App: React.FC = () => {
       {/* Footer */}
       <footer className={`py-20 text-center px-6 transition-all ${isCoffee ? 'bg-[#5c3c21] text-[#fdf6e3]' : 'bg-[#0a192f] text-[#64ffda]'}`}>
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-3xl font-bold mb-4">Interessado em colaborar?</h2>
-          <p className="mb-8 opacity-70">Sinta-se à vontade para entrar em contato para discutir {isCoffee ? 'backend distribuído' : 'sistemas de tempo real'}.</p>
+          <h2 className="text-3xl font-bold mb-4">{ui.footer.collab[lang]}</h2>
+          <p className="mb-8 opacity-70">{ui.footer.discuss[lang]}</p>
           <div className="flex justify-center gap-6 mb-8">
             <a href={`mailto:${PERSONAL_INFO.email}`} className="hover:scale-110 transition-transform"><Mail size={24} /></a>
             <a href={PERSONAL_INFO.linkedin} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><Linkedin size={24} /></a>
             <a href={PERSONAL_INFO.github} target="_blank" rel="noopener noreferrer" className="hover:scale-110 transition-transform"><Github size={24} /></a>
           </div>
           <p className="text-sm opacity-40 font-mono italic">
-            {isCoffee ? 'Processado com Java & Grãos Selecionados.' : 'System.out.println("0xDEADC0DE"); // Compiled for speed.'}
+            {ui.footer.note[lang]}
           </p>
         </div>
       </footer>
