@@ -1,6 +1,6 @@
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,6 +45,11 @@
         }
         .animate-skill-out {
             animation: skill-out 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Ensure smooth scroll hits the right spot with sticky header */
+        section {
+            scroll-margin-top: 100px;
         }
     </style>
 <script type="importmap">
