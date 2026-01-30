@@ -48,7 +48,6 @@ export interface SkillItem {
   name: string;
   icon: string;
   details?: LocalizedList;
-  level?: 'Basic' | 'Intermediate' | 'Advanced' | 'Master';
 }
 
 export interface Skill {

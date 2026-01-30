@@ -22,39 +22,41 @@ export const PERSONAL_INFO = {
 export const EXPERIENCES: Experience[] = [
   {
     company: "ZG Soluções",
-    role: { pt: "Desenvolvedor Backend Java", en: "Java Backend Developer" },
+    role: { pt: "Mestre Arcanista de Backend Java", en: "Java Backend Archmage" },
     period: "2023 – Present",
     location: "Ceará, Brazil",
     description: {
       pt: [
-        "Desenvolvimento de soluções robustas para reconciliação de contas médicas, otimizando o ciclo de receita de hospitais.",
-        "Engenharia de workflows de processamento de dados de alta performance utilizando Java e Groovy.",
-        "Criação de Web Crawlers para leitura e submissão automatizada de centenas de guias médicas em minutos.",
-        "Implementação de processamento assíncrono com Kafka para garantir resiliência do sistema.",
-        "Manipulação avançada de arquivos PDF, CSV, XML e HTML com foco em performance."
+        "Invocação de fluxos de dados de alta performance para reconciliação de contas médicas.",
+        "Engenharia de rituais de processamento assíncrono com Kafka para garantir resiliência absoluta do Reino.",
+        "Criação de sentinelas (Web Crawlers) para automatizar a leitura de guias médicas complexas.",
+        "Transmutação de arquivos PDF, CSV e XML em estruturas de dados sagradas com foco em performance extrema.",
+        "Liderança técnica em dungeons de bugs críticos, restaurando a ordem no ecossistema Spring."
       ],
       en: [
-        "Development of robust solutions for medical billing reconciliation, optimizing hospital revenue cycles.",
-        "Engineering high-performance data processing workflows using Java and Groovy.",
-        "Creation of Web Crawlers for automated reading and submission of hundreds of medical guides in minutes.",
-        "Implementation of asynchronous processing with Kafka to ensure system resilience.",
-        "Advanced manipulation of PDF, CSV, XML, and HTML files with a focus on performance."
+        "Summoning high-performance data streams for medical billing reconciliation.",
+        "Engineering asynchronous processing rituals with Kafka to ensure the Realm's absolute resilience.",
+        "Creating sentinels (Web Crawlers) to automate the reading of complex medical guides.",
+        "Transmuting PDF, CSV, and XML files into sacred data structures with a focus on extreme performance.",
+        "Technical leadership in critical bug dungeons, restoring order to the Spring ecosystem."
       ]
     }
   },
   {
     company: "UFC",
-    role: { pt: "Monitor de Arquitetura de Computadores", en: "Computer Architecture Teaching Assistant" },
+    role: { pt: "Sábio Mentor de Arquitetura", en: "Sage Architecture Mentor" },
     period: "2023 – 2024",
     location: "Quixadá, CE",
     description: {
       pt: [
-        "Instrução de alunos em aulas práticas sobre operação de equipamentos eletrônicos e design de circuitos digitais.",
-        "Auxílio no desenvolvimento de projetos práticos envolvendo microcontroladores e lógica digital."
+        "Transmissão de conhecimentos ancestrais sobre design de circuitos digitais e lógica de silício.",
+        "Treinamento de novos heróis na manipulação de microcontroladores e equipamentos eletrônicos de precisão.",
+        "Supervisão de forjas de hardware, auxiliando na criação de processadores MIPS funcionais."
       ],
       en: [
-        "Instruction of students in practical classes on the operation of electronic equipment and digital circuit design.",
-        "Assistance in the development of practical projects involving microcontrollers and digital logic."
+        "Transmitting ancestral knowledge on digital circuit design and silicon logic.",
+        "Training new heroes in manipulating microcontrollers and precision electronic equipment.",
+        "Supervising hardware forges, assisting in the creation of functional MIPS processors."
       ]
     }
   }
@@ -160,7 +162,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "Java 17+", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/java/java-original.svg",
-        level: 'Master',
         details: {
           pt: ["Streams API & Lambdas", "JVM Performance Tuning", "Multithreading & Concurrency"],
           en: ["Streams API & Lambdas", "JVM Performance Tuning", "Multithreading & Concurrency"]
@@ -169,7 +170,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "Groovy", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/groovy/groovy-original.svg",
-        level: 'Advanced',
         details: {
           pt: ["Dynamic Scripting", "Custom DSLs", "Integration with Jenkins"],
           en: ["Dynamic Scripting", "Custom DSLs", "Integration with Jenkins"]
@@ -178,7 +178,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "SQL", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg",
-        level: 'Advanced',
         details: {
           pt: ["Consultas Complexas", "Otimização de Queries", "Mapeamento Relacional"],
           en: ["Complex Queries", "Query Optimization", "Relational Mapping"]
@@ -192,7 +191,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "Spring Boot", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/spring/spring-original.svg",
-        level: 'Master',
         details: {
           pt: ["Security & OAuth2", "Microservices", "Data JPA & Hibernate"],
           en: ["Security & OAuth2", "Microservices", "Data JPA & Hibernate"]
@@ -201,7 +199,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "Apache Kafka", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apachekafka/apachekafka-original.svg",
-        level: 'Advanced',
         details: {
           pt: ["Event-Driven Arch", "Consumer Groups", "Resilient Processing"],
           en: ["Event-Driven Arch", "Consumer Groups", "Resilient Processing"]
@@ -210,7 +207,6 @@ export const COFFEE_SKILLS: Skill[] = [
       { 
         name: "Docker", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg",
-        level: 'Intermediate',
         details: {
           pt: ["Containerização", "Docker Compose", "Otimização de Recursos"],
           en: ["Containerization", "Docker Compose", "Resource Optimization"]
@@ -227,7 +223,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "C/C++", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/cplusplus/cplusplus-original.svg",
-        level: 'Master',
         details: {
           pt: ["Gerenciamento de Ponteiros", "Acesso a Registradores", "Eficiência Algorítmica"],
           en: ["Pointer Management", "Direct Register Access", "Algorithm Efficiency"]
@@ -236,7 +231,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "Assembly", 
         icon: "https://img.icons8.com/ios-filled/50/processor.png",
-        level: 'Advanced',
         details: {
           pt: ["ISA (MIPS/RISC-V)", "Otimização Crítica", "Debuggers"],
           en: ["ISA (MIPS/RISC-V)", "Critical Optimization", "Debuggers"]
@@ -245,7 +239,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "VHDL", 
         icon: "https://img.icons8.com/ios/50/chip.png",
-        level: 'Advanced',
         details: {
           pt: ["FSM Design", "Lógica Sintetizável", "Vivado & ModelSim"],
           en: ["FSM Design", "Synthesizable Logic", "Vivado & ModelSim"]
@@ -259,7 +252,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "FreeRTOS", 
         icon: "https://img.icons8.com/color/48/freertos.png",
-        level: 'Advanced',
         details: {
           pt: ["Escalonamento de Tarefas", "Mutex & Filas", "Restrições Real-time"],
           en: ["Task Scheduling", "Mutex & Queues", "Real-time Constraints"]
@@ -268,7 +260,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "STM32", 
         icon: "https://img.icons8.com/color/48/stm32.png",
-        level: 'Advanced',
         details: {
           pt: ["HAL & LL Libraries", "DMA & Interrupts", "Peripherals (I2C, SPI)"],
           en: ["HAL & LL Libraries", "DMA & Interrupts", "Peripherals (I2C, SPI)"]
@@ -277,7 +268,6 @@ export const HARDWARE_SKILLS: Skill[] = [
       { 
         name: "Embedded Linux", 
         icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg",
-        level: 'Intermediate',
         details: {
           pt: ["Compilação de Kernel", "Device Trees", "Buildroot/Yocto"],
           en: ["Kernel Compilation", "Device Trees", "Buildroot/Yocto"]

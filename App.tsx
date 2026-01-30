@@ -18,7 +18,6 @@ import {
   ChevronLeft, 
   ChevronRight, 
   Zap, 
-  Cpu,
   Sword,
   Sparkles,
   Terminal,
@@ -29,7 +28,15 @@ import {
   Trophy,
   ScrollText,
   Monitor,
-  Globe
+  Globe,
+  Flame,
+  Shield,
+  Crown,
+  History,
+  Target,
+  Dna,
+  Workflow,
+  Cpu
 } from 'lucide-react';
 import { GoogleGenAI } from "@google/genai";
 
@@ -46,8 +53,9 @@ const App: React.FC = () => {
   // Project Carousel State
   const [activeProjectIndex, setActiveProjectIndex] = useState(0);
 
-  // Tech Skill Selection
+  // Tech Skill Selection with animation state
   const [activeSkill, setActiveSkill] = useState<SkillItem | null>(null);
+  const [isClosingSkill, setIsClosingSkill] = useState(false);
 
   // Animation state
   const [isProjectsInView, setIsProjectsInView] = useState(false);
@@ -68,8 +76,8 @@ const App: React.FC = () => {
     },
     headings: {
       resumo: { pt: "Resumo", en: "Summary" },
-      trajetoria: { pt: "Trajetória", en: "Path" },
-      techStack: { pt: "Tech Stack", en: "Tech Stack" },
+      trajetoria: { pt: "Quest History: Chronicles of Mastery", en: "Quest History: Chronicles of Mastery" },
+      techStack: { pt: "Skill Tree", en: "Skill Tree" },
       questLog: { pt: "Quest Log", en: "Quest Log" }
     },
     ai: {
@@ -84,7 +92,13 @@ const App: React.FC = () => {
       class: { pt: "Classe", en: "Class" },
       completion: { pt: "Progresso", en: "Progress" },
       inspect: { pt: "Clique para inspecionar missão", en: "Click to inspect quest" },
-      level: { pt: "NÍVEL", en: "LEVEL" }
+      level: { pt: "CONHECIMENTO", en: "KNOWLEDGE" }
+    },
+    experience: {
+        questLabel: { pt: "MISSÃO ATUAL", en: "ACTIVE QUEST" },
+        legacyLabel: { pt: "MISSÃO CONCLUÍDA", en: "COMPLETED QUEST" },
+        guild: { pt: "Guilda", en: "Guild" },
+        achievements: { pt: "Conquistas da Campanha", en: "Campaign Achievements" }
     },
     footer: {
       collab: { pt: "Interessado em colaborar?", en: "Interested in collaborating?" },
@@ -100,6 +114,9 @@ const App: React.FC = () => {
     modal: {
       techStack: { pt: "Stack Tecnológica", en: "Technology Stack" },
       github: { pt: "Ver no Github", en: "View on Github" }
+    },
+    skills: {
+        root: { pt: isCoffee ? "Raiz Arcaica" : "Núcleo de Silício", en: isCoffee ? "Arcane Root" : "Silicon Core" }
     }
   };
 
@@ -108,6 +125,7 @@ const App: React.FC = () => {
   const toggleTheme = () => {
     setTheme(prev => prev === Theme.COFFEE ? Theme.HARDWARE : Theme.COFFEE);
     setActiveSkill(null);
+    setIsClosingSkill(false);
     setActiveProjectIndex(0);
   };
 
@@ -146,12 +164,30 @@ const App: React.FC = () => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
         setSelectedProject(null);
-        setActiveSkill(null);
+        handleSkillClose();
       }
     };
     window.addEventListener('keydown', handleEsc);
     return () => window.removeEventListener('keydown', handleEsc);
   }, []);
+
+  const handleSkillClick = (skill: SkillItem) => {
+    if (activeSkill?.name === skill.name) {
+      handleSkillClose();
+    } else {
+      setActiveSkill(skill);
+      setIsClosingSkill(false);
+    }
+  };
+
+  const handleSkillClose = () => {
+    if (!activeSkill) return;
+    setIsClosingSkill(true);
+    setTimeout(() => {
+      setActiveSkill(null);
+      setIsClosingSkill(false);
+    }, 200);
+  };
 
   const handleAiAsk = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -159,6 +195,7 @@ const App: React.FC = () => {
 
     setIsAiLoading(true);
     try {
+      // Corrected: Initialize with an object containing apiKey.
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
       const prompt = `
         Você é o assistente virtual do Guilherme Araújo Floriano.
@@ -366,95 +403,186 @@ const App: React.FC = () => {
         </div>
       </Section>
 
-      {/* Experiência Section */}
+      {/* Experiência Section - RPG QUEST CHRONICLES */}
       <Section id="experiencia" title={ui.headings.trajetoria[lang]} theme={theme}>
-        <div className="space-y-12">
-          {EXPERIENCES.map((exp, idx) => (
-            <div key={idx} className="group relative">
-              <div className={`absolute -left-4 top-0 bottom-0 w-[2px] ${isCoffee ? 'bg-[#5c3c21]/10' : 'bg-[#64ffda]/10'}`}></div>
-              <div className="pl-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-2">
-                  <h3 className={`text-2xl font-bold ${isCoffee ? 'text-[#5c3c21]' : 'text-[#ccd6f6]'}`}>
-                    {exp.role[lang]} <span className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}>@ {exp.company}</span>
-                  </h3>
-                  <span className={`text-sm font-mono opacity-60`}>{exp.period}</span>
+        <div className="relative space-y-16 py-10">
+          {EXPERIENCES.map((exp, idx) => {
+            const isActive = idx === 0;
+            return (
+              <div key={idx} className="relative group">
+                {/* Visual Connector */}
+                <div className={`absolute -left-6 top-0 bottom-[-64px] w-[3px] opacity-20 ${isCoffee ? 'bg-[#5c3c21]' : 'bg-[#64ffda]'} ${idx === EXPERIENCES.length - 1 ? 'hidden' : ''}`}></div>
+                
+                {/* Quest Node/Marker */}
+                <div className={`absolute -left-10 top-0 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-500 z-10
+                  ${isActive ? 
+                    (isCoffee ? 'bg-[#5c3c21] border-[#8b4513] text-white animate-pulse' : 'bg-[#64ffda] border-[#64ffda] text-[#0a192f] shadow-[0_0_15px_#64ffda]') : 
+                    (isCoffee ? 'bg-[#fdf6e3] border-[#5c3c21]/30 text-[#5c3c21]' : 'bg-[#0a192f] border-[#64ffda]/30 text-[#64ffda]')
+                  }
+                `}>
+                   {isActive ? <Flame size={16} /> : <Shield size={16} />}
                 </div>
-                <div className="flex items-center gap-4 text-sm mb-4 opacity-70">
-                  <span className="flex items-center gap-1"><MapPin size={14} /> {exp.location}</span>
+
+                <div className={`pl-8 transition-all duration-500 transform group-hover:translate-x-2`}>
+                  <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                    <div>
+                      {/* Quest Status Badge */}
+                      <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black tracking-tighter uppercase mb-2
+                        ${isActive ? 
+                          (isCoffee ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-cyan-100 text-cyan-900 border border-cyan-400') : 
+                          (isCoffee ? 'bg-gray-100 text-gray-700 border border-gray-300' : 'bg-gray-800 text-gray-400 border border-gray-700')
+                        }
+                      `}>
+                         {isActive ? <Target size={12} /> : <History size={12} />}
+                         {isActive ? ui.experience.questLabel[lang] : ui.experience.legacyLabel[lang]}
+                      </div>
+
+                      <h3 className={`text-3xl md:text-4xl font-black ${isCoffee ? 'text-[#5c3c21]' : 'text-[#ccd6f6]'} leading-none`}>
+                        {exp.role[lang]} 
+                      </h3>
+                      <div className={`flex items-center gap-2 mt-2 font-bold ${isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'}`}>
+                         <Crown size={16} />
+                         {ui.experience.guild[lang]}: {exp.company}
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 md:mt-0 flex flex-col items-end">
+                       <span className={`text-sm font-mono opacity-60 flex items-center gap-2`}>
+                         <Calendar size={14} /> {exp.period}
+                       </span>
+                       <span className={`text-xs opacity-40 flex items-center gap-1 mt-1 uppercase tracking-widest`}>
+                         <MapPin size={12} /> {exp.location}
+                       </span>
+                    </div>
+                  </div>
+
+                  {/* Campaign achievements / Missions list */}
+                  <div className={`relative p-8 rounded-2xl border-l-4 transition-all duration-300
+                    ${isCoffee ? 
+                      'bg-[#f7efd9]/50 border-[#8b4513] hover:bg-[#f7efd9]' : 
+                      'bg-[#112240]/50 border-[#64ffda] hover:bg-[#112240]'
+                    }
+                  `}>
+                    <h4 className="text-[10px] uppercase font-black tracking-[0.2em] mb-4 opacity-50 flex items-center gap-2">
+                       {isCoffee ? <ScrollText size={14} /> : <Activity size={14} />}
+                       {ui.experience.achievements[lang]}
+                    </h4>
+                    <ul className="space-y-4">
+                      {exp.description[lang].map((item, i) => (
+                        <li key={i} className="flex gap-3 text-lg leading-snug opacity-90">
+                          <span className={`mt-1.5 h-2 w-2 rounded-sm flex-shrink-0 ${isCoffee ? 'bg-[#8b4513] rotate-45' : 'bg-[#64ffda] shadow-[0_0_5px_#64ffda]'}`}></span>
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
-                <ul className="space-y-3">
-                  {exp.description[lang].map((item, i) => (
-                    <li key={i} className="flex gap-3 text-lg leading-relaxed opacity-80">
-                      <span className={`mt-2 h-1.5 w-1.5 rounded-full flex-shrink-0 ${isCoffee ? 'bg-[#8b4513]' : 'bg-[#64ffda]'}`}></span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </Section>
 
-      {/* Competências Section */}
+      {/* Competências Section - SKILL TREE */}
       <Section id="competencias" title={ui.headings.techStack[lang]} theme={theme}>
-        <div className="grid md:grid-cols-2 gap-12">
-          {currentSkills.map((cat, idx) => (
-            <div key={idx} className="space-y-6">
-              <h3 className={`text-2xl font-black mb-8 border-l-4 pl-4 ${isCoffee ? 'border-[#5c3c21] text-[#5c3c21]' : 'border-[#64ffda] text-[#64ffda]'}`}>
-                {cat.category[lang]}
-              </h3>
-              <div className="flex flex-wrap gap-4">
-                {cat.items.map((skill, si) => (
-                  <div key={si} className="relative">
-                    <button
-                      onClick={() => setActiveSkill(activeSkill?.name === skill.name ? null : skill)}
-                      className={`flex items-center gap-3 px-6 py-3 rounded-lg text-sm font-black transition-all duration-300 border-2
-                        ${activeSkill?.name === skill.name ? 
-                          (isCoffee ? 'bg-[#5c3c21] text-white border-[#5c3c21] shadow-lg scale-105' : 'bg-[#64ffda] text-[#0a192f] border-[#64ffda] shadow-[0_0_20px_rgba(100,255,218,0.5)] scale-105') : 
-                          (isCoffee ? 'bg-white border-[#5c3c21]/20 text-[#5c3c21] hover:border-[#5c3c21]/60' : 'bg-[#112240] border-[#64ffda]/20 text-[#64ffda] hover:border-[#64ffda]/60')
-                        }
-                      `}
-                    >
-                      <img src={skill.icon} alt={skill.name} className="w-5 h-5 object-contain" />
-                      {skill.name}
-                      {isCoffee ? <Sword size={14} className="opacity-50" /> : <Terminal size={14} className="opacity-50" />}
-                    </button>
-
-                    {/* Themed RPG/Cyberpunk Detailed Menu */}
-                    {activeSkill?.name === skill.name && (
-                      <div className={`absolute top-full left-0 mt-4 w-72 z-50 p-6 shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300
-                        ${isCoffee ? 
-                          'bg-[#f7efd9] border-4 border-[#8b4513] rounded-sm text-[#5c3c21] font-serif shadow-[8px_8px_0px_#5c3c21]' : 
-                          'bg-[#0a192f] border-2 border-[#64ffda] rounded-none text-[#64ffda] font-mono shadow-[0_0_30px_rgba(100,255,218,0.2)]'
-                        }
-                      `}>
-                        <div className="flex items-center justify-between mb-4 border-b pb-2 border-current">
-                           <span className="text-xs font-black uppercase tracking-widest flex items-center gap-2">
-                             {isCoffee ? <Sparkles size={14} /> : <Activity size={14} />}
-                             {ui.stats.level[lang]}: {skill.level}
-                           </span>
-                           <X 
-                             size={16} 
-                             className="cursor-pointer hover:rotate-90 transition-transform" 
-                             onClick={(e) => { e.stopPropagation(); setActiveSkill(null); }} 
-                           />
-                        </div>
-                        <ul className="space-y-3">
-                           {skill.details?.[lang].map((detail, di) => (
-                             <li key={di} className="text-sm flex gap-2">
-                               <span className="flex-shrink-0">{isCoffee ? '🛡️' : '>>'}</span>
-                               {detail}
-                             </li>
-                           ))}
-                        </ul>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
+        <div className="relative py-12 flex flex-col items-center overflow-visible">
+          
+          {/* Root Node */}
+          <div className="relative z-10 mb-16">
+            <div className={`flex flex-col items-center justify-center w-32 h-32 rounded-full border-4 theme-transition animate-bounce-slow
+              ${isCoffee ? 'bg-[#8b4513] border-[#5c3c21] text-white shadow-lg' : 'bg-[#64ffda] border-[#0a192f] text-[#0a192f] shadow-[0_0_30px_#64ffda]'}
+            `}>
+              {isCoffee ? <Dna size={40} /> : <Workflow size={40} />}
+              <span className="mt-2 text-[10px] font-black uppercase tracking-widest">{ui.skills.root[lang]}</span>
             </div>
-          ))}
+            
+            {/* Trunk line */}
+            <div className={`absolute left-1/2 top-full -translate-x-1/2 w-[4px] h-16
+              ${isCoffee ? 'bg-[#8b4513]/20' : 'bg-[#64ffda]/30'}
+            `}></div>
+          </div>
+
+          {/* Skill Tree Branches */}
+          <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-12 relative overflow-visible">
+            {currentSkills.map((cat, idx) => (
+              <div key={idx} className="relative flex flex-col items-center">
+                
+                {/* Horizontal connection line to trunk */}
+                <div className={`hidden md:block absolute top-[-34px] w-1/2 h-[4px]
+                  ${idx === 0 ? 'right-1/2 rounded-l-full' : 'left-1/2 rounded-r-full'}
+                  ${isCoffee ? 'bg-[#8b4513]/20' : 'bg-[#64ffda]/30'}
+                `}></div>
+                
+                {/* Category Node */}
+                <h3 className={`relative z-10 text-xl font-black mb-12 px-8 py-3 rounded-full border-2 theme-transition uppercase tracking-widest
+                  ${isCoffee ? 'bg-[#fdf6e3] border-[#5c3c21] text-[#5c3c21]' : 'bg-[#0a192f] border-[#64ffda] text-[#64ffda] shadow-[0_0_15px_rgba(100,255,218,0.2)]'}
+                `}>
+                  {cat.category[lang]}
+                  
+                  {/* Line down to items */}
+                  <div className={`absolute left-1/2 top-full -translate-x-1/2 w-[2px] h-12
+                    ${isCoffee ? 'bg-[#8b4513]/20' : 'bg-[#64ffda]/30'}
+                  `}></div>
+                </h3>
+
+                {/* Skill Item Nodes */}
+                <div className="flex flex-wrap justify-center gap-6 relative">
+                  {cat.items.map((skill, si) => (
+                    <div key={si} className="relative group/skill">
+                      
+                      <button
+                        onClick={() => handleSkillClick(skill)}
+                        className={`flex flex-col items-center justify-center p-6 w-32 h-32 rounded-2xl text-xs font-black transition-all duration-300 border-2 text-center
+                          ${activeSkill?.name === skill.name ? 
+                            (isCoffee ? 'bg-[#5c3c21] text-white border-[#5c3c21] shadow-lg scale-110' : 'bg-[#64ffda] text-[#0a192f] border-[#64ffda] shadow-[0_0_20px_rgba(100,255,218,0.5)] scale-110') : 
+                            (isCoffee ? 'bg-white border-[#5c3c21]/20 text-[#5c3c21] hover:border-[#5c3c21]/60 hover:scale-105' : 'bg-[#112240] border-[#64ffda]/20 text-[#64ffda] hover:border-[#64ffda]/60 hover:scale-105')
+                          }
+                        `}
+                      >
+                        <img src={skill.icon} alt={skill.name} className="w-8 h-8 object-contain mb-3 grayscale group-hover/skill:grayscale-0 transition-all" />
+                        <span className="leading-tight">{skill.name}</span>
+                        
+                        <div className="absolute top-2 right-2 opacity-10 group-hover/skill:opacity-100 transition-opacity">
+                          {isCoffee ? <Sword size={12} /> : <Terminal size={12} />}
+                        </div>
+                      </button>
+
+                      {/* Detailed Popup with Skill Tree Connection Line */}
+                      {(activeSkill?.name === skill.name || (isClosingSkill && activeSkill?.name === skill.name)) && (
+                        <div className={`absolute top-full left-1/2 -translate-x-1/2 mt-6 w-64 z-50 p-6 shadow-2xl transition-all
+                          ${isClosingSkill ? 'animate-skill-out' : 'animate-skill-in'}
+                          ${isCoffee ? 
+                            'bg-[#f7efd9] border-4 border-[#8b4513] rounded-sm text-[#5c3c21] font-serif shadow-[8px_8px_0px_#5c3c21]' : 
+                            'bg-[#0a192f] border-2 border-[#64ffda] rounded-none text-[#64ffda] font-mono shadow-[0_0_30px_rgba(100,255,218,0.2)]'
+                          }
+                        `}>
+                          <div className="flex items-center justify-between mb-4 border-b pb-2 border-current">
+                             <span className="text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+                               {isCoffee ? <Sparkles size={14} /> : <Activity size={14} />}
+                               {ui.stats.level[lang]}
+                             </span>
+                             <X 
+                               size={14} 
+                               className="cursor-pointer hover:rotate-90 transition-transform" 
+                               onClick={(e) => { e.stopPropagation(); handleSkillClose(); }} 
+                             />
+                          </div>
+                          <ul className="space-y-3">
+                             {skill.details?.[lang].map((detail, di) => (
+                               <li key={di} className="text-xs flex gap-2 leading-tight">
+                                 <span className="flex-shrink-0 opacity-60">{isCoffee ? '🛡️' : '>>'}</span>
+                                 {detail}
+                               </li>
+                             ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </Section>
 
@@ -552,6 +680,7 @@ const App: React.FC = () => {
 
                     <div className="group">
                       <div className="flex items-center gap-3 mb-2">
+                        {/* Corrected: Use 'Zap' which is imported, instead of 'ZapIcon' which was not found. */}
                         <Zap className={isCoffee ? 'text-[#8b4513]' : 'text-[#64ffda]'} size={20} />
                         <span className="text-xs font-black uppercase tracking-widest">{ui.stats.difficulty[lang]}</span>
                       </div>

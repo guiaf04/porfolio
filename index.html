@@ -30,6 +30,22 @@
         .reveal-card {
             transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.8s ease-out;
         }
+
+        /* Skill Card Animations */
+        @keyframes skill-in {
+            from { opacity: 0; transform: translateY(-10px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        @keyframes skill-out {
+            from { opacity: 1; transform: translateY(0) scale(1); }
+            to { opacity: 0; transform: translateY(-10px) scale(0.95); }
+        }
+        .animate-skill-in {
+            animation: skill-in 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        .animate-skill-out {
+            animation: skill-out 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
     </style>
 <script type="importmap">
 {
